@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shepard Claret Data Collection</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Global body styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-weight: bold;
+        }
+
+        /* Main container styling */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: #fff;
+            padding: 30px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        /* Form styling for alignment and uniformity */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            margin-bottom: 20px;
+        }
+
+        label {
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Info sections for data importance and integrity */
+        .info-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .info-section p {
+            text-align: justify;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shepard Claret Data Collection</h1>
+        <p id="userCount">Total Users: 0</p>
+        <form id="dataForm">
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" required>
+
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="role">Role:</label>
+            <select id="role" name="role">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <label for="date_joined">Date Joined (YYYY-MM-DD):</label>
+            <input type="date" id="date_joined" name="date_joined" required>
+
+            <button type="submit">Submit</button>
+        </form>
+        <p id="responseMessage" class="hidden">Input Received</p>
+
+        <!-- Section highlighting the importance of data -->
+        <div class="info-section">
+            <h2>Importance of Data</h2>
+            <p>
+                Data is the backbone of informed decision-making. In our educational environment, data drives innovation, allows us to personalize learning, and optimizes resource allocation. By collecting accurate data, we ensure that every student's journey is tailored for success.
+            </p>
+        </div>
+
+        <!-- Section highlighting the significance of data integrity -->
+        <div class="info-section">
+            <h2>Data Integrity</h2>
+            <p>
+                Maintaining data integrity is crucial to preserving the trust and reliability of our system. It means ensuring that data is accurate, consistent, and secure from unauthorized access or corruption. Our commitment to data integrity underpins every decision we make, from daily operations to long-term strategic planning.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch total user count from the backend
+        async function fetchUserCount() {
+            try {
+                const response = await fetch('/users/count');
+                const data = await response.json();
+                document.getElementById('userCount').textContent = "Total Users: " + data.count;
+            } catch (error) {
+                console.error("Error fetching user count:", error);
+            }
+        }
+
+        // Fetch user count on page load
+        window.addEventListener('load', fetchUserCount);
+
+        // Handle form submission
+        const form = document.getElementById('dataForm');
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Prepare form data for POST submission
+            const formData = new FormData(form);
+            const data = new URLSearchParams();
+            for (const pair of formData) {
+                data.append(pair[0], pair[1]);
+            }
+
+            // Send the POST request to the /users/ endpoint
+            const response = await fetch('/users/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: data
+            });
+
+            if (response.ok) {
+                // On success, hide the form and display "Input Received"
+                form.style.display = 'none';
+                document.getElementById('responseMessage').classList.remove('hidden');
+                // Refresh the total user count
+                fetchUserCount();
+            } else {
+                alert("There was an error submitting the form.");
+            }
+        });
+    </script>
+</body>
+</html>
