@@ -14,6 +14,15 @@ def get_db():
         db.close()
 
 
+@router.get("/users/count")
+def user_count(db: Session = Depends(get_db)):
+    """
+    Returns the total number of users in the database.
+    """
+    count = db.query(models.User).count()
+    return {"count": count}
+
+
 @router.post("/users/", response_model=schemas.User)
 def create_user(
         first_name: str = Form(...),
@@ -23,7 +32,10 @@ def create_user(
         date_joined: str = Form(...),
         db: Session = Depends(get_db)
 ):
-    # Check if email already exists
+    """
+    Creates a new user with the provided information.
+    """
+    # Ensure email is unique
     db_user = db.query(models.User).filter(models.User.email == email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -44,15 +56,3 @@ def create_user(
     db.commit()
     db.refresh(new_user)
     return new_user
-
-
-@router.get("/users/count")
-def user_count(db: Session = Depends(get_db)):
-    count = db.query(models.User).count()
-    return {"count": count}
-
-
-@router.get("/users/", response_model=list[schemas.User])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = db.query(models.User).offset(skip).limit(limit).all()
-    return users
