@@ -1,23 +1,21 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from backend import models, database, endpoints
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
-
-# Create database tables
-models.Base.metadata.create_all(bind=database.engine)
+import pathlib
 
 app = FastAPI()
 
-# Include API endpoints
-app.include_router(endpoints.router)
+# Calculate absolute paths relative to this file's parent directory
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+templates_dir = BASE_DIR / "frontend" / "templates"
+static_dir = BASE_DIR / "frontend" / "static"
 
-# Setup templates and static files
-templates = Jinja2Templates(directory="frontend/templates")
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+# Mount static files
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# Setup templates
+templates = Jinja2Templates(directory=str(templates_dir))
 
 @app.get("/")
 def read_root(request: Request):
